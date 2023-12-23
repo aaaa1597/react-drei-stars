@@ -1,39 +1,42 @@
-import React, {useRef} from 'react';
-import './App.css';
-import { Canvas, useFrame, MeshProps  } from '@react-three/fiber'
+import React, { Suspense, useRef } from "react";
+import { Group } from "three";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls, PerspectiveCamera, Stars } from "@react-three/drei";
 
-type Props = {
-  position?: number[];
-  name?: string;
-}
-
-const Box = (props: Props) => {
-  const ref = useRef<MeshProps>()
+const Particle = () => {
+  const ref = useRef({} as Group);
 
   useFrame((_, delta) => {
-    if( !ref.current) return
-    ref.current.rotation.x += 1 * delta
-    ref.current.rotation.y += 0.5 * delta
+    ref.current.rotation.y += -0.001;
+    ref.current.rotation.x += 0.001;
   })
 
   return (
-    <mesh {...props} ref={ref}>
-      <boxGeometry />
-      <meshBasicMaterial color={0x00ff00} wireframe />
-    </mesh>
-  )
+    <group ref={ref}>
+      <Stars
+        radius={100} // 星の点滅(拡大)度合い
+        depth={50}
+        count={5000} // 星の数
+        factor={6} // 星の大きさ
+        saturation={9}
+        speed={3} // 点滅のスピード
+      />
+    </group>
+  );
 }
 
 const App = () => {
   return (
-    <div style={{ width: "75vw", height: "75vh" }}>
-      <Canvas camera={{ position: [3, 1, 2] }}>
-        <ambientLight />
-        <directionalLight />
-        <Box position={[-0.75, 0, 0]} name="A" />
-        <Box position={[0.75, 0, 0]} name="B" />
+    <Suspense fallback={<span>loading...</span>}>
+      <div style={{ width: "100vw", height: "100vh" }}>
+      <Canvas>
+        <color args={["#010"]} attach={"background"} />
+        <PerspectiveCamera />
+        <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+        <Particle />
       </Canvas>
-    </div>
+      </div>
+    </Suspense>
   );
 }
 
